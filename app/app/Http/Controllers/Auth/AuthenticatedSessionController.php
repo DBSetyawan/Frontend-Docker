@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Auth;
 
+use DataTables;
 use App\Models\User;
+use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -52,5 +54,50 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerateToken();
 
         return redirect('/');
+    }
+
+
+    public function list(Request $request)
+    {
+        if ($request->ajax()) {
+
+            $client = new Client([
+                'headers' => ['Content-Type' => 'application/json']
+            ]);
+
+            $response = $client->get(
+                'https://devel.bebasbayar.com/web/test_programmer.php'
+            );
+
+            $data = json_decode($response->getBody()->getContents(), true);
+
+
+            foreach ($data as $key => $value) {
+                # code...
+                if (isset($value[$key])) {
+                    $collect[] = $value;
+                } else {
+                    if ($value !== []) {
+
+                        for ($i = 0; $i < count($value); $i++) {
+                            # code...
+                            $collect[$key] = $value[$i];
+                        }
+                    }
+                }
+            }
+
+            return Datatables::collection($collect)->addIndexColumn()
+                ->addColumn('action', function ($row) {
+                    $btn = '<button class="btn btn-success btn-xs
+                              ModalTriggerBtn " id="ModalTriggerBtn"  
+                              data-catid=' . $row['nb_visits'] . ' data-toggle="modal"
+                              data-target="#customermodal"><span class="glyphicon glyphicon-trash" title="Delete Center"/>Detail</button>';
+
+                    return $btn;
+                })
+                ->rawColumns(['action'])
+                ->make(true);
+        }
     }
 }
