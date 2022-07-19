@@ -2,11 +2,12 @@
 
 namespace App\Http\Requests\Auth;
 
-use Illuminate\Auth\Events\Lockout;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\RateLimiter;
+use GuzzleHttp\Client;
 use Illuminate\Support\Str;
+use Illuminate\Auth\Events\Lockout;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\ValidationException;
 
 class LoginRequest extends FormRequest
@@ -43,19 +44,47 @@ class LoginRequest extends FormRequest
      */
     public function authenticate()
     {
-        $this->ensureIsNotRateLimited();
+        $client = new Client([
+            'headers' => ['Content-Type' => 'application/json', 'Accept' => 'application/json']
+        ]);
 
-        if (!Auth::attempt([
-            'user' => $this->input('user'),
-            'password' => $this->input('password'),
-        ], $this->boolean('remember'))) {
-            RateLimiter::hit($this->throttleKey());
+        $response = $client->get(
+            'http://10.219.104.251:8892/oauth-aci',
+            ['body' => json_encode(
+                [
+                    'user' => $this->input('user'),
+                    'password' => $this->input('password')
+                ]
+            )]
+        );
 
-            throw ValidationException::withMessages([
-                'user' => trans('auth.failed'),
-            ]);
+        $data = json_decode($response->getBody()->getContents(), true);
+
+        if (isset($data['rd']) == "Sukses") {
+            $this->ensureIsNotRateLimited();
+
+            if (!Auth::attempt([
+                'user' => $this->input('user'),
+                'password' => $this->input('password'),
+            ], $this->boolean('remember'))) {
+
+                throw ValidationException::withMessages([
+                    'user' => trans('auth.failed'),
+                ]);
+            }
+        } else {
+
+            if (!Auth::attempt([
+                'user' => $this->input('user'),
+                'password' => $this->input('password'),
+            ], $this->boolean('remember'))) {
+
+                throw ValidationException::withMessages([
+                    'user' => trans('auth.failed'),
+                ]);
+                RateLimiter::hit($this->throttleKey());
+            }
         }
-
         RateLimiter::clear($this->throttleKey());
     }
 
