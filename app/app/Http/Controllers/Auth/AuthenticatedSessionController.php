@@ -18,7 +18,7 @@ class AuthenticatedSessionController extends Controller
      */
     public function create()
     {
-        dd(User::all());
+        // dd(User::all());
         return view('auth.login');
     }
 
