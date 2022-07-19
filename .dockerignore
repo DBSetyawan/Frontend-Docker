@@ -1,0 +1,6 @@
+.git
+app/.git
+app/syncup.sh
+app/node_modules
+apps/.git
+apps/node_modules

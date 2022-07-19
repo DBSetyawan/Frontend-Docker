@@ -1,0 +1,59 @@
+version: "3"
+services:
+
+# php api module
+  app:
+    build:
+      args:
+        user: ${UID}:${GID}
+      context: ./php
+      dockerfile: Dockerfile
+    image: daniel/php-backend
+    restart: unless-stopped
+    tty: true
+    environment:
+      TZ: '${TZ:-Asia/Jakarta}'
+    volumes:
+      - './${APP_DOCROOT}:/var/www'
+    working_dir: /var/www
+    networks:
+      - app-network
+
+  # Nginx Service
+  webserver_aci:
+    image: nginx:latest
+    restart: unless-stopped
+    tty: true
+    ports:
+      - '${FORWARD_APP_PORT:-84}:84'
+    environment:
+      TZ: '${TZ:-Asia/Jakarta}'
+    volumes:
+      - './${APP_DOCROOT}:/var/www'
+      - './nginx/conf.d:/etc/nginx/conf.d'
+    networks:
+      - app-network
+  
+  node:
+    image: node:10-alpine
+    container_name: node
+    working_dir: /var/www/app
+    volumes:
+      - './${APP_DOCROOT}:/var/www'
+      - ./docker/init-scripts/:/init-scripts/
+    entrypoint:
+      - /init-scripts/node_start.sh
+    depends_on:
+      - 'app'
+    networks:
+      - app-network
+
+#Volumes
+volumes:
+  dbdata:
+    driver: local
+
+#Docker Networks
+networks:
+  app-network:
+    driver: bridge
