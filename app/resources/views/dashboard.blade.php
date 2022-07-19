@@ -77,6 +77,21 @@
                             });
                         });
 
+                $('body').on('click', '.ModalTriggerBtn', function () {
+                    var customerid = $(this).data('catid');
+                    var endpoint = '{{ route("specific.data", ":id") }}';
+                    endpoint = endpoint.replace(':id', customerid);
+                    $.get(endpoint, function (data) {
+                        var sd = data[Object.keys(data)[0]]
+                        var date = Object.keys(data[Object.keys(data)[0]])[0]
+
+                        $('#customermodal').modal('show');
+                        $('#modelHeading').html(date);
+                        $('#name').val(sd[Object.keys(sd)[0]].label);
+                        $('#vsts').val(sd[Object.keys(sd)[0]].nb_visits);
+                    })
+                });
+
                     </script>
                     <div class="container">
                         <div class="card-header border-left">
@@ -99,7 +114,7 @@
                                             <input type="hidden" name="customerid" id="customerid">
 
                                             <div class="form-group">
-                                                <label for="name" class="col-sm-6 control-label">Customer Name</label>
+                                                <label for="name" class="col-sm-6 control-label">Label</label>
                                                 <div class="col-sm-12">
                                                     <input type="text" class="form-control" id="name" name="name"
                                                         placeholder="Name" value="" maxlength="50" required="">
@@ -107,9 +122,9 @@
                                             </div>
 
                                             <div class="form-group">
-                                                <label class="col-sm-6 control-label">Customer Name</label>
+                                                <label class="col-sm-6 control-label">Visits</label>
                                                 <div class="col-sm-12">
-                                                    <input type="text" class="form-control" id="chiname" name="chiname"
+                                                    <input type="text" class="form-control" id="vsts" name="vsts"
                                                         placeholder="Customer Name" value="" maxlength="50" required="">
                                                 </div>
                                             </div>

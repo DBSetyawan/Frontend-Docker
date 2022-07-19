@@ -1,3 +1,1 @@
-# Backend-Docker
-# Backend-Docker
-# Frontend-Docker
+add vendor : docker-compose exec app composer require yajra/laravel-datatables-oracle:"~9.0"

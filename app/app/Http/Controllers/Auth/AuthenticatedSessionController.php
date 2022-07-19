@@ -100,4 +100,37 @@ class AuthenticatedSessionController extends Controller
                 ->make(true);
         }
     }
+
+    public function SpecificData($id = 0)
+    {
+
+        $client = new Client([
+            'headers' => ['Content-Type' => 'application/json']
+        ]);
+
+        $response = $client->get(
+            'https://devel.bebasbayar.com/web/test_programmer.php'
+        );
+        $data = json_decode($response->getBody()->getContents(), true);
+
+        foreach ($data as $key => $value) {
+            # code...
+            if (isset($value[$key])) {
+                $collect[] = $value;
+            } else {
+                if ($value !== []) {
+
+                    for ($i = 0; $i < count($value); $i++) {
+                        # code...
+                        $collect[$key] = $value[$i];
+                    }
+                }
+            }
+        }
+
+        $collection = collect($collect);
+        $filteredItems = $collection->where('nb_visits', $id);
+
+        return response()->json(['data' => $filteredItems]);
+    }
 }

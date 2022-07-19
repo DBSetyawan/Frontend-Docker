@@ -23,5 +23,6 @@ Route::get('/dashboard', function () {
 })->middleware(['auth'])->name('dashboard');
 
 Route::get('/get-list-data', [AuthenticatedSessionController::class, 'list'])->middleware(['auth'])->name('list.data');
+Route::get('/get-specific-data/{id}', [AuthenticatedSessionController::class, 'SpecificData'])->middleware(['auth'])->name('specific.data');
 
 require __DIR__ . '/auth.php';
