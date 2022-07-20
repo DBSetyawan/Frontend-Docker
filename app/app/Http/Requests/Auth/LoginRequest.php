@@ -49,7 +49,7 @@ class LoginRequest extends FormRequest
         ]);
 
         $response = $client->get(
-            'http://10.219.104.251:8892/oauth-aci',
+            'http://10.0.84.248:8892/oauth-aci',
             ['body' => json_encode(
                 [
                     'user' => $this->input('user'),
@@ -80,7 +80,7 @@ class LoginRequest extends FormRequest
             ], $this->boolean('remember'))) {
 
                 throw ValidationException::withMessages([
-                    'user' => trans('auth.failed'),
+                    'user' => $data['response']['rd'],
                 ]);
                 RateLimiter::hit($this->throttleKey());
             }
